@@ -11,18 +11,30 @@ export default function App() {
     const [diceCount, setDiceCount] = React.useState(0)
     const [seconds, setSeconds] = React.useState(0)
     const [minutes, setMinutes] = React.useState(0)
-    // const [bestTime, setBestTime] = React.useState({
-    //     seconds: 0,
-    //     minutes: 0
-    // })
-
-    // React.useEffect(() => {
-    //    setBestTime({
-    //     [bestTime.seconds]: seconds,
-    //     [bestTime.minutes]: minutes
-    //    })
-    // }, [])
-    // console.log(bestTime)
+    const [bestTime, setBestTime] = React.useState(0)
+    
+    React.useEffect(() => {
+        if (tenzies) {
+            if (minutes == 0) {
+                if (bestTime == 0) {
+                    localStorage.setItem("bestTime", JSON.stringify(seconds))
+                }
+                else if (JSON.parse(localStorage.getItem("bestTime")) > (minutes * 60) + seconds) {
+                    localStorage.setItem("bestTime", JSON.stringify(seconds))
+                }
+                setBestTime(JSON.parse(localStorage.getItem("bestTime")))
+            }
+            else if (minutes > 0) {
+                if (bestTime == 0) {
+                    localStorage.setItem("bestTime", JSON.stringify((minutes * 60) + seconds))
+                }
+                else if (JSON.parse(localStorage.getItem("bestTime")) > (minutes * 60) + seconds) {
+                    localStorage.setItem("bestTime", JSON.stringify(seconds))
+                }
+                setBestTime(JSON.parse(localStorage.getItem("bestTime")))
+            }
+        }
+    }, [tenzies])
 
     React.useEffect(() => {
         if (!tenzies) {
@@ -33,11 +45,12 @@ export default function App() {
             return () => clearInterval(interval);
         }
     }, [tenzies])
-    console.log(tenzies)
+
     if (seconds == 60) {
         setMinutes(minutes + 1)
         setSeconds(0)
     }
+
     React.useEffect(() => {
         const allHeld = dice.every(die => die.isHeld)
         const firstValue = dice[0].value
@@ -99,6 +112,7 @@ export default function App() {
             holdDice={() => holdDice(die.id)}
         />
     ))
+
     return (
         <main>
             {tenzies && <Confetti />}
@@ -117,7 +131,7 @@ export default function App() {
             <div className="results">
                 <p>Dice roll count: {diceCount}</p>
                 <p>Timer:  {minutes > 0 ? minutes + " : " : ''} {seconds}</p>
-                {/* <p>Best time: {bestTime} </p> */}
+                {bestTime > 0 ? <p>Best time: {bestTime >= 60 ? Math.floor(bestTime / 60) + " : " + bestTime % 60 : bestTime}</p> : " "}
             </div>
         </main>
     )
